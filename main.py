@@ -1,7 +1,14 @@
 import discord
 import random
+from dotenv import load_dotenv
+import os
+from discord.ext import commands
 
-TOKEN = 'seu_token_de_autenticacao'
+load_dotenv()
+
+TOKEN = os.getenv('BOT_TOKEN')
+
+intents = discord.Intents.all()
 
 # lista com 10 frases de C-3PO
 c3po_quotes = [
@@ -17,17 +24,16 @@ c3po_quotes = [
     "Eu não sei de onde você vem, mas eu sei para onde você vai: retidão e verdade são seus companheiros constantes."
 ]
 
-bot = discord.Client()
+bot = commands.Bot(command_prefix='!', intents=intents)
 
 @bot.event
 async def on_ready():
     print('Logado como {0.user}'.format(bot))
 
-@bot.event
-async def on_message(message):
-    if message.content.startswith('!quote'):
-        quote = random.choice(c3po_quotes)
-        response = f'"{quote}"'
-        await message.channel.send(response)
+@bot.command(name="q")
+async def quote(ctx):
+    quote = random.choice(c3po_quotes)
+    response = quote
+    await ctx.send(response)
 
 bot.run(TOKEN)
