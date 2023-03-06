@@ -17,7 +17,7 @@ c3po_happy = [    "R2-D2, você é o melhor amigo que já tive!",    "Estou prog
 
 c3po_sad = [    "Oh, alguém tem que salvar nossas peles. Incrível, mesmo para mim!",    "Nós nos perdemos na nave quando as portas começaram a fechar.",    "Eu não estou muito confiante com o que estamos fazendo.",    "Eu gostaria de ser útil, mas não sou programado para fazer sentido em situações como esta.",    "Eu gostaria que R2-D2 estivesse aqui conosco. Ele seria útil agora.",    "Acho que fomos abandonados.",    "Não quero saber, eu só quero sair daqui.",    "Estou com medo, senhor.",    "Me desculpe, senhor. Eu não posso explicá-lo. Eu não sou feito para entendê-lo.",    "Estamos perdidos! "    "Não sabemos onde estamos ou para onde estamos indo.",]
 
-c3po_admin = [    "Alô? Alguém está em casa?",    "Está me ouvindo, capitão? Você não pode mudar a lei da física!",    "Ouça, tenho um protocolo de emergência que você precisa acionar.",    "Desculpe, senhor, mas é contra meu programa inventar planos.",    "Não se preocupe, senhor. Eu estou perfeitamente bem. Só estou morrendo.",    "Se o que você está dizendo é verdade, então eu ainda não quero ouvir.",    "Senhor, por favor. "    "Eu não sou um herói. "    "Na verdade, não sou feito para voar.",    "Desculpe, senhor, mas isso não faz sentido para mim. Eu sou apenas um droide.",    "Senhor Solo, é muito improvável que sobrevivamos a esta desgraça."]
+c3po_admin = [    "Desculpe, mas esse tipo de comportamento não é aceitável aqui.",    "Por favor, respeite as regras deste servidor.",    "Vamos manter o respeito e a educação no chat, por favor.",    "Não é adequado usar esse tipo de linguagem aqui.",    "Lembre-se de que há outras pessoas aqui que podem se sentir ofendidas.",    "Vamos nos concentrar em manter a conversa saudável e respeitosa.",    "Por favor, evite linguagem ofensiva ou insultos.",    "Se você tiver alguma dúvida sobre as regras do servidor, por favor leia as informações.",    "Vamos ser respeitosos uns com os outros e manter uma conversa saudável.",    "Por favor, ajude a manter este servidor um lugar seguro e respeitoso para todos."]
 
 all_quotes = [c3po_happy, c3po_sad, c3po_admin]
 
@@ -34,13 +34,28 @@ async def quote(ctx):
     await ctx.send(quote)
 
 #C-3PO mantem a ordem quando alguém usa palavras de baixo calão no server
+
+processed_messages = {}
+
 @bot.event
 async def on_message(message):
+    # Verifica se a mensagem foi enviada pelo bot ou se já foi processada
+    if message.author.bot or message.id in processed_messages:
+        return
+
     xingamentos = ["caralho", "bosta", "merda", "cu"] # lista de xingamentos
-    if any(word in message.content.lower() for word in xingamentos):
-        quote = random.choice(c3po_admin) # escolhe uma frase da lista c3po_admin
-        await message.channel.send(quote) # envia a frase no canal
+    for word in xingamentos:
+        if word in message.content:
+            await message.channel.send(random.choice(c3po_admin))
+            processed_messages[message.id] = True
+            asyncio.create_task(remove_processed_message(message.id))
+            break
+
     await bot.process_commands(message)
+
+async def remove_processed_message(message_id):
+    await asyncio.sleep(3)  # aguarda 3 segundos
+    processed_messages.pop(message_id, None)
 
 
 bot.run(TOKEN)
