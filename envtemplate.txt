@@ -1,0 +1,1 @@
+Renomeie esse arquivo como " .env" e coloque a constante BOT_TOKEN seguida pelo token
